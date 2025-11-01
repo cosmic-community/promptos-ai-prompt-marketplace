@@ -11,6 +11,21 @@ const emit = defineEmits<{
 }>()
 
 const isMenuOpen = ref(false)
+// Mock wallet balance - in production, this would come from a user store/API
+const walletBalance = ref(500000)
+
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+    notation: 'compact'
+  }).format(price)
+}
+
+const goToWallet = () => {
+  // In production, this would navigate to wallet page
+  alert('Redirecting to wallet page...')
+}
 </script>
 
 <template>
@@ -40,6 +55,17 @@ const isMenuOpen = ref(false)
         
         <!-- Actions -->
         <div class="flex items-center space-x-4">
+          <!-- Wallet Balance -->
+          <button 
+            @click="goToWallet"
+            class="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl glass hover:bg-white/30 dark:hover:bg-black/30 transition-all"
+          >
+            <span class="text-xl">💳</span>
+            <span class="font-semibold text-gradient">
+              {{ formatPrice(walletBalance) }}
+            </span>
+          </button>
+
           <!-- Theme Toggle -->
           <button 
             @click="emit('toggleTheme')"
@@ -70,6 +96,18 @@ const isMenuOpen = ref(false)
       <!-- Mobile Menu -->
       <div v-if="isMenuOpen" class="md:hidden mt-4 pt-4 border-t border-white/30 dark:border-white/10">
         <div class="flex flex-col space-y-3">
+          <!-- Wallet Balance Mobile -->
+          <button 
+            @click="goToWallet"
+            class="flex items-center justify-between glass hover:bg-white/30 dark:hover:bg-black/30 px-4 py-3 rounded-xl"
+          >
+            <span class="text-gray-700 dark:text-gray-300 font-medium">Wallet Balance</span>
+            <span class="font-semibold text-gradient flex items-center gap-2">
+              <span class="text-xl">💳</span>
+              {{ formatPrice(walletBalance) }}
+            </span>
+          </button>
+
           <router-link to="/" @click="isMenuOpen = false" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors py-2">
             Home
           </router-link>

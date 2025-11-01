@@ -58,6 +58,39 @@ export interface SubscriptionPlan extends CosmicObject {
   };
 }
 
+// Wallet interface
+export interface Wallet {
+  balance: number;
+  currency: string;
+  transactions: WalletTransaction[];
+}
+
+// Wallet transaction interface
+export interface WalletTransaction {
+  id: string;
+  type: 'topup' | 'purchase' | 'refund';
+  amount: number;
+  description: string;
+  date: string;
+  status: 'pending' | 'completed' | 'failed';
+}
+
+// Payment method type
+export type PaymentMethod = 'wallet' | 'bank_transfer';
+
+// Purchase interface
+export interface Purchase {
+  id: string;
+  promptId: string;
+  promptTitle: string;
+  subscriptionPlanId?: string;
+  subscriptionPlanTitle?: string;
+  amount: number;
+  paymentMethod: PaymentMethod;
+  status: 'pending' | 'completed' | 'failed';
+  date: string;
+}
+
 // API response types
 export interface CosmicResponse<T> {
   objects: T[];
