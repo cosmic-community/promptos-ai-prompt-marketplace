@@ -35,13 +35,13 @@ const activePurchases = computed(() => {
 
 const handleTopUp = () => {
   if (topUpAmount.value <= 0) {
-    alert('Please enter a valid amount')
+    window.alert('Please enter a valid amount')
     return
   }
   
   const success = userStore.topUpWallet(topUpAmount.value)
   if (success) {
-    alert(`Successfully added ${formatPrice(topUpAmount.value)} to your wallet! 🎉`)
+    window.alert(`Successfully added ${formatPrice(topUpAmount.value)} to your wallet! 🎉`)
     topUpAmount.value = 100000
   }
 }
@@ -279,7 +279,7 @@ const copyToClipboard = (text: string) => {
                   v-if="purchase.type === 'subscription'"
                   @click="() => {
                     // Mock renewal
-                    alert('Renewal functionality coming soon!')
+                    window.alert('Renewal functionality coming soon!')
                   }"
                   class="btn-primary flex-1"
                 >
