@@ -3,7 +3,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import Home from './views/Home.vue'
 import PromptDetail from './views/PromptDetail.vue'
-import Pricing from './views/Pricing.vue'
+import Login from './views/Login.vue'
+import Cart from './views/Cart.vue'
+import Account from './views/Account.vue'
 import './style.css'
 
 const router = createRouter({
@@ -20,9 +22,19 @@ const router = createRouter({
       component: PromptDetail
     },
     {
-      path: '/pricing',
-      name: 'pricing',
-      component: Pricing
+      path: '/login',
+      name: 'login',
+      component: Login
+    },
+    {
+      path: '/cart',
+      name: 'cart',
+      component: Cart
+    },
+    {
+      path: '/account',
+      name: 'account',
+      component: Account
     }
   ]
 })

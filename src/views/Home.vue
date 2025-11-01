@@ -47,15 +47,15 @@ onMounted(async () => {
           <span class="text-gradient block mt-2">AI Prompts</span>
         </h1>
         <p class="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
-          Your all-in-one store for ChatGPT, Midjourney, and Gemini prompts. Browse premium prompts or subscribe for unlimited access.
+          Your all-in-one store for ChatGPT, Midjourney, and Gemini prompts. Browse premium prompts and purchase individually for lifetime access.
         </p>
         
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
           <a href="#prompts" class="btn-primary">
             Browse Prompts
           </a>
-          <router-link to="/pricing" class="btn-secondary">
-            View Pricing
+          <router-link to="/account" class="btn-secondary">
+            My Account
           </router-link>
         </div>
       </div>
@@ -110,8 +110,8 @@ onMounted(async () => {
         <p class="text-lg text-gray-600 dark:text-gray-400 mb-8">
           Join thousands of users creating amazing content with AI prompts
         </p>
-        <router-link to="/pricing" class="btn-primary inline-block">
-          View Subscription Plans
+        <router-link to="/login" class="btn-primary inline-block">
+          Sign Up Now
         </router-link>
       </div>
     </section>

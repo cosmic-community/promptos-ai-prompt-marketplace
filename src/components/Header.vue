@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/userStore'
 
 interface Props {
   isDark: boolean
@@ -10,9 +12,9 @@ const emit = defineEmits<{
   toggleTheme: []
 }>()
 
+const router = useRouter()
+const userStore = useUserStore()
 const isMenuOpen = ref(false)
-// Mock wallet balance - in production, this would come from a user store/API
-const walletBalance = ref(500000)
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -22,9 +24,10 @@ const formatPrice = (price: number) => {
   }).format(price)
 }
 
-const goToWallet = () => {
-  // In production, this would navigate to wallet page
-  alert('Redirecting to wallet page...')
+const handleLogout = () => {
+  userStore.logout()
+  router.push('/')
+  isMenuOpen.value = false
 }
 </script>
 
@@ -48,23 +51,50 @@ const goToWallet = () => {
           <router-link to="/#prompts" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">
             Prompts
           </router-link>
-          <router-link to="/pricing" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors">
-            Pricing
-          </router-link>
         </div>
         
         <!-- Actions -->
         <div class="flex items-center space-x-4">
-          <!-- Wallet Balance -->
-          <button 
-            @click="goToWallet"
+          <!-- Cart Button (only if logged in) -->
+          <router-link 
+            v-if="userStore.isLoggedIn"
+            to="/cart"
+            class="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl glass hover:bg-white/30 dark:hover:bg-black/30 transition-all relative"
+          >
+            <span class="text-xl">🛒</span>
+            <span v-if="userStore.cartCount > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+              {{ userStore.cartCount }}
+            </span>
+          </router-link>
+
+          <!-- Wallet Balance (only if logged in) -->
+          <router-link 
+            v-if="userStore.isLoggedIn"
+            to="/account"
             class="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl glass hover:bg-white/30 dark:hover:bg-black/30 transition-all"
           >
             <span class="text-xl">💳</span>
             <span class="font-semibold text-gradient">
-              {{ formatPrice(walletBalance) }}
+              {{ formatPrice(userStore.wallet.balance) }}
             </span>
-          </button>
+          </router-link>
+
+          <!-- Login/Account Button -->
+          <router-link 
+            v-if="!userStore.isLoggedIn"
+            to="/login"
+            class="hidden md:block btn-primary py-2 px-4"
+          >
+            Login
+          </router-link>
+          <router-link 
+            v-else
+            to="/account"
+            class="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl glass hover:bg-white/30 dark:hover:bg-black/30 transition-all"
+          >
+            <span class="text-xl">👤</span>
+            <span class="font-medium">{{ userStore.currentUser?.name }}</span>
+          </router-link>
 
           <!-- Theme Toggle -->
           <button 
@@ -96,17 +126,31 @@ const goToWallet = () => {
       <!-- Mobile Menu -->
       <div v-if="isMenuOpen" class="md:hidden mt-4 pt-4 border-t border-white/30 dark:border-white/10">
         <div class="flex flex-col space-y-3">
-          <!-- Wallet Balance Mobile -->
-          <button 
-            @click="goToWallet"
+          <!-- User Info (if logged in) -->
+          <div v-if="userStore.isLoggedIn" class="glass p-3 rounded-xl">
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-gray-700 dark:text-gray-300 font-medium">👤 {{ userStore.currentUser?.name }}</span>
+              <button @click="handleLogout" class="text-sm text-red-600 dark:text-red-400">
+                Logout
+              </button>
+            </div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">
+              Wallet: {{ formatPrice(userStore.wallet.balance) }}
+            </div>
+          </div>
+
+          <!-- Cart (if logged in) -->
+          <router-link 
+            v-if="userStore.isLoggedIn"
+            to="/cart" 
+            @click="isMenuOpen = false" 
             class="flex items-center justify-between glass hover:bg-white/30 dark:hover:bg-black/30 px-4 py-3 rounded-xl"
           >
-            <span class="text-gray-700 dark:text-gray-300 font-medium">Wallet Balance</span>
-            <span class="font-semibold text-gradient flex items-center gap-2">
-              <span class="text-xl">💳</span>
-              {{ formatPrice(walletBalance) }}
+            <span class="text-gray-700 dark:text-gray-300 font-medium">🛒 Shopping Cart</span>
+            <span v-if="userStore.cartCount > 0" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+              {{ userStore.cartCount }}
             </span>
-          </button>
+          </router-link>
 
           <router-link to="/" @click="isMenuOpen = false" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors py-2">
             Home
@@ -114,8 +158,22 @@ const goToWallet = () => {
           <router-link to="/#prompts" @click="isMenuOpen = false" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors py-2">
             Prompts
           </router-link>
-          <router-link to="/pricing" @click="isMenuOpen = false" class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors py-2">
-            Pricing
+          
+          <router-link 
+            v-if="userStore.isLoggedIn"
+            to="/account" 
+            @click="isMenuOpen = false" 
+            class="text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors py-2"
+          >
+            My Account
+          </router-link>
+          <router-link 
+            v-else
+            to="/login" 
+            @click="isMenuOpen = false" 
+            class="btn-primary text-center"
+          >
+            Login
           </router-link>
         </div>
       </div>

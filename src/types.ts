@@ -58,6 +58,39 @@ export interface SubscriptionPlan extends CosmicObject {
   };
 }
 
+// User interface
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  createdAt: string;
+}
+
+// Cart Item interface
+export interface CartItem {
+  id: string;
+  prompt: Prompt;
+  subscriptionPlan?: SubscriptionPlan;
+  addedAt: string;
+}
+
+// Purchased Product interface
+export interface PurchasedProduct {
+  id: string;
+  promptId: string;
+  promptTitle: string;
+  promptSlug: string;
+  subscriptionPlanId?: string;
+  subscriptionPlanTitle?: string;
+  purchaseDate: string;
+  expiryDate?: string;
+  accessKey: string;
+  accessUrl: string;
+  price: number;
+  type: 'one-time' | 'subscription';
+  status: 'active' | 'expired';
+}
+
 // Wallet interface
 export interface Wallet {
   balance: number;

@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getPrompt, getSubscriptionPlans } from '@/lib/api'
-import type { Prompt, SubscriptionPlan, PaymentMethod } from '@/types'
-import PurchaseModal from '@/components/PurchaseModal.vue'
+import { getPrompt } from '@/lib/api'
+import { useUserStore } from '@/stores/userStore'
+import type { Prompt } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 const prompt = ref<Prompt | null>(null)
-const subscriptionPlans = ref<SubscriptionPlan[]>([])
 const loading = ref(true)
-const showPurchaseModal = ref(false)
-const selectedPlan = ref<SubscriptionPlan | null>(null)
+const showFullContent = ref(false)
 
 const formatPrice = (price: number) => {
   return new Intl.NumberFormat('vi-VN', {
@@ -25,23 +24,71 @@ const parseTags = computed(() => {
   return prompt.value.metadata.tags.split(',').map(tag => tag.trim())
 })
 
-const openPurchaseModal = (plan?: SubscriptionPlan) => {
-  selectedPlan.value = plan || null
-  showPurchaseModal.value = true
+const purchasedProduct = computed(() => {
+  if (!prompt.value) return null
+  return userStore.purchasedProducts.find(p => p.promptId === prompt.value!.id)
+})
+
+const hasPurchased = computed(() => !!purchasedProduct.value)
+
+const timeRemaining = computed(() => {
+  if (!purchasedProduct.value?.expiryDate) return null
+  
+  const now = new Date()
+  const expiry = new Date(purchasedProduct.value.expiryDate)
+  const diff = expiry.getTime() - now.getTime()
+  
+  if (diff <= 0) return 'Expired'
+  
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  
+  if (days > 0) return `${days} days ${hours} hours remaining`
+  return `${hours} hours remaining`
+})
+
+const handleAddToCart = () => {
+  if (!userStore.isLoggedIn) {
+    router.push('/login')
+    return
+  }
+
+  if (!prompt.value) return
+
+  const added = userStore.addToCart({
+    id: Math.random().toString(36).substr(2, 9),
+    prompt: prompt.value,
+    addedAt: new Date().toISOString()
+  })
+
+  if (added) {
+    alert('Added to cart! 🎉')
+  } else {
+    alert('This item is already in your cart')
+  }
 }
 
-const closePurchaseModal = () => {
-  showPurchaseModal.value = false
-  selectedPlan.value = null
+const handleRenew = () => {
+  if (!purchasedProduct.value || !prompt.value) return
+  
+  // Mock renewal with 1 month extension
+  const renewed = userStore.renewSubscription(
+    purchasedProduct.value.id,
+    'renewal',
+    prompt.value.metadata.price
+  )
+  
+  if (renewed) {
+    alert('Subscription renewed! 🎉')
+  } else {
+    alert('Insufficient wallet balance. Please top up your wallet.')
+  }
 }
 
 onMounted(async () => {
   try {
     const slug = route.params.slug as string
-    const [promptData, plansData] = await Promise.all([
-      getPrompt(slug),
-      getSubscriptionPlans()
-    ])
+    const promptData = await getPrompt(slug)
     
     if (!promptData) {
       router.push('/')
@@ -49,7 +96,6 @@ onMounted(async () => {
     }
     
     prompt.value = promptData
-    subscriptionPlans.value = plansData
   } catch (error) {
     console.error('Error loading prompt:', error)
     router.push('/')
@@ -131,19 +177,16 @@ onMounted(async () => {
               </div>
             </div>
 
-            <!-- Prompt Content Preview -->
-            <div v-if="prompt.metadata.prompt_content" class="glass-card">
-              <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Prompt Template</h3>
+            <!-- Example Output -->
+            <div v-if="prompt.metadata.example_output" class="glass-card">
+              <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Example Output</h3>
               <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
-                <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap line-clamp-6">{{ prompt.metadata.prompt_content }}</pre>
+                <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ prompt.metadata.example_output }}</pre>
               </div>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                🔒 Purchase to unlock the full prompt template
-              </p>
             </div>
           </div>
           
-          <!-- Right Column: Purchase Options -->
+          <!-- Right Column: Details & Purchase -->
           <div class="space-y-6">
             <div>
               <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
@@ -153,12 +196,79 @@ onMounted(async () => {
                 {{ prompt.metadata.description }}
               </p>
             </div>
+
+            <!-- Purchased Product Info -->
+            <div v-if="hasPurchased && purchasedProduct" class="glass-card border-2 border-green-500">
+              <div class="mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-white">✅ You Own This Prompt</h3>
+                  <span :class="[
+                    'text-xs px-2 py-1 rounded-full font-medium',
+                    purchasedProduct.status === 'active' 
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                      : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                  ]">
+                    {{ purchasedProduct.status === 'active' ? 'Active' : 'Expired' }}
+                  </span>
+                </div>
+                
+                <!-- Countdown Timer -->
+                <div v-if="purchasedProduct.type === 'subscription' && timeRemaining" class="mb-3">
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600 dark:text-gray-400">Time Remaining</span>
+                    <span class="font-semibold text-gray-900 dark:text-white">⏰ {{ timeRemaining }}</span>
+                  </div>
+                </div>
+                
+                <!-- Access Key -->
+                <div class="mb-3">
+                  <label class="text-sm text-gray-600 dark:text-gray-400 block mb-1">Access Key</label>
+                  <div class="flex items-center gap-2">
+                    <code class="flex-1 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded text-sm font-mono">
+                      {{ purchasedProduct.accessKey }}
+                    </code>
+                    <button 
+                      @click="navigator.clipboard.writeText(purchasedProduct.accessKey)"
+                      class="btn-secondary py-2 px-3 text-sm"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                </div>
+                
+                <!-- Access URL -->
+                <div class="mb-4">
+                  <label class="text-sm text-gray-600 dark:text-gray-400 block mb-1">Access URL</label>
+                  <div class="flex items-center gap-2">
+                    <code class="flex-1 bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded text-sm font-mono truncate">
+                      {{ purchasedProduct.accessUrl }}
+                    </code>
+                    <a 
+                      :href="purchasedProduct.accessUrl"
+                      target="_blank"
+                      class="btn-secondary py-2 px-3 text-sm"
+                    >
+                      Open
+                    </a>
+                  </div>
+                </div>
+                
+                <!-- Renew Button -->
+                <button 
+                  v-if="purchasedProduct.type === 'subscription'"
+                  @click="handleRenew"
+                  class="btn-primary w-full"
+                >
+                  Renew Subscription
+                </button>
+              </div>
+            </div>
             
-            <!-- One-Time Purchase -->
-            <div class="glass-card border-2 border-primary-500">
+            <!-- Purchase Option (if not purchased) -->
+            <div v-else class="glass-card border-2 border-primary-500">
               <div class="mb-4">
                 <div class="flex items-center justify-between mb-2">
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white">One-Time Purchase</h3>
+                  <h3 class="text-xl font-bold text-gray-900 dark:text-white">Purchase Now</h3>
                   <span class="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-1 rounded-full font-medium">
                     Lifetime Access
                   </span>
@@ -172,88 +282,38 @@ onMounted(async () => {
                   {{ formatPrice(prompt.metadata.price) }}
                 </p>
                 <button 
-                  @click="openPurchaseModal()"
+                  @click="handleAddToCart"
                   class="btn-primary w-full"
                 >
-                  Purchase Now
+                  Add to Cart
                 </button>
               </div>
             </div>
-
-            <!-- Subscription Plans -->
-            <div class="glass-card">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                Or Subscribe for Unlimited Access
-              </h3>
-              <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                Get access to this prompt and all others in our library
-              </p>
-              
-              <div class="space-y-3">
-                <div 
-                  v-for="plan in subscriptionPlans"
-                  :key="plan.id"
-                  :class="[
-                    'glass p-4 rounded-xl hover:bg-white/30 dark:hover:bg-black/30 transition-all cursor-pointer border-2',
-                    plan.metadata.is_popular ? 'border-primary-500' : 'border-transparent'
-                  ]"
-                  @click="openPurchaseModal(plan)"
-                >
-                  <div class="flex items-center justify-between mb-2">
-                    <div>
-                      <div class="flex items-center gap-2">
-                        <h4 class="font-bold text-gray-900 dark:text-white">
-                          {{ plan.title }}
-                        </h4>
-                        <span 
-                          v-if="plan.metadata.is_popular"
-                          class="text-xs bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 px-2 py-0.5 rounded-full font-medium"
-                        >
-                          Popular
-                        </span>
-                      </div>
-                      <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {{ plan.metadata.duration_months }} month{{ plan.metadata.duration_months > 1 ? 's' : '' }} access
-                        <span v-if="plan.metadata.discount_percentage && plan.metadata.discount_percentage > 0" class="text-green-600 dark:text-green-400 font-medium">
-                          • Save {{ plan.metadata.discount_percentage }}%
-                        </span>
-                      </p>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-2xl font-bold text-gradient">
-                        {{ formatPrice(plan.metadata.price) }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <router-link 
-                to="/pricing" 
-                class="btn-secondary w-full mt-4 block text-center"
-              >
-                Compare All Plans
-              </router-link>
-            </div>
             
-            <!-- Example Output -->
-            <div v-if="prompt.metadata.example_output" class="glass-card">
-              <h3 class="font-semibold text-gray-900 dark:text-white mb-3">Example Output</h3>
-              <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
-                <pre class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{{ prompt.metadata.example_output }}</pre>
+            <!-- Detailed Description Section -->
+            <div class="glass-card">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-semibold text-gray-900 dark:text-white">Full Prompt Template</h3>
+                <button 
+                  @click="showFullContent = !showFullContent"
+                  class="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+                >
+                  {{ showFullContent ? 'Show Less' : 'Show More' }}
+                </button>
               </div>
+              <div class="bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
+                <pre :class="[
+                  'text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap',
+                  showFullContent ? '' : 'line-clamp-6'
+                ]">{{ prompt.metadata.prompt_content }}</pre>
+              </div>
+              <p v-if="!hasPurchased" class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                🔒 Purchase to unlock full access and support
+              </p>
             </div>
           </div>
         </div>
       </div>
     </div>
-
-    <!-- Purchase Modal -->
-    <PurchaseModal 
-      v-if="showPurchaseModal && prompt"
-      :prompt="prompt"
-      :subscription-plan="selectedPlan"
-      @close="closePurchaseModal"
-    />
   </div>
 </template>
