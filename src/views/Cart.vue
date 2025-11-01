@@ -16,7 +16,7 @@ const formatPrice = (price: number) => {
 }
 
 const hasEnoughBalance = computed(() => {
-  return userStore.wallet.balance >= userStore.cartTotal.value
+  return userStore.wallet.value.balance >= userStore.cartTotal.value
 })
 
 const handleCheckout = async () => {
@@ -26,7 +26,7 @@ const handleCheckout = async () => {
   }
 
   if (selectedPaymentMethod.value === 'wallet' && !hasEnoughBalance.value) {
-    window.alert('Insufficient wallet balance. Please top up your wallet.')
+    alert('Insufficient wallet balance. Please top up your wallet.')
     return
   }
 
@@ -40,10 +40,10 @@ const handleCheckout = async () => {
   isProcessing.value = false
   
   if (success) {
-    window.alert('Purchase successful! 🎉 Check your account for purchased prompts.')
+    alert('Purchase successful! 🎉 Check your account for purchased prompts.')
     router.push('/account')
   } else {
-    window.alert('Purchase failed. Please try again.')
+    alert('Purchase failed. Please try again.')
   }
 }
 </script>
@@ -130,7 +130,7 @@ const handleCheckout = async () => {
               <div class="flex items-center justify-between">
                 <span class="text-gray-600 dark:text-gray-400">Wallet Balance</span>
                 <span class="text-xl font-bold text-gray-900 dark:text-white">
-                  {{ formatPrice(userStore.wallet.balance) }}
+                  {{ formatPrice(userStore.wallet.value.balance) }}
                 </span>
               </div>
             </div>

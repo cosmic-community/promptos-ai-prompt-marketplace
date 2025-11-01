@@ -75,7 +75,7 @@ const handleLogout = () => {
           >
             <span class="text-xl">💳</span>
             <span class="font-semibold text-gradient">
-              {{ formatPrice(userStore.wallet.balance) }}
+              {{ formatPrice(userStore.wallet.value.balance) }}
             </span>
           </router-link>
 
@@ -135,7 +135,7 @@ const handleLogout = () => {
               </button>
             </div>
             <div class="text-sm text-gray-600 dark:text-gray-400">
-              Wallet: {{ formatPrice(userStore.wallet.balance) }}
+              Wallet: {{ formatPrice(userStore.wallet.value.balance) }}
             </div>
           </div>
 

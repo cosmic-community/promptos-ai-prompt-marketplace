@@ -35,13 +35,13 @@ const activePurchases = computed(() => {
 
 const handleTopUp = () => {
   if (topUpAmount.value <= 0) {
-    window.alert('Please enter a valid amount')
+    alert('Please enter a valid amount')
     return
   }
   
   const success = userStore.topUpWallet(topUpAmount.value)
   if (success) {
-    window.alert(`Successfully added ${formatPrice(topUpAmount.value)} to your wallet! 🎉`)
+    alert(`Successfully added ${formatPrice(topUpAmount.value)} to your wallet! 🎉`)
     topUpAmount.value = 100000
   }
 }
@@ -163,7 +163,7 @@ const copyToClipboard = (text: string) => {
               </div>
               <div class="glass p-4 rounded-xl text-center">
                 <p class="text-3xl font-bold text-gradient mb-2">
-                  {{ formatPrice(userStore.wallet.balance) }}
+                  {{ formatPrice(userStore.wallet.value.balance) }}
                 </p>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                   Wallet Balance
@@ -171,7 +171,7 @@ const copyToClipboard = (text: string) => {
               </div>
               <div class="glass p-4 rounded-xl text-center">
                 <p class="text-3xl font-bold text-gradient mb-2">
-                  {{ userStore.wallet.transactions.length }}
+                  {{ userStore.wallet.value.transactions.length }}
                 </p>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                   Transactions
@@ -279,7 +279,7 @@ const copyToClipboard = (text: string) => {
                   v-if="purchase.type === 'subscription'"
                   @click="() => {
                     // Mock renewal
-                    window.alert('Renewal functionality coming soon!')
+                    alert('Renewal functionality coming soon!')
                   }"
                   class="btn-primary flex-1"
                 >
@@ -297,7 +297,7 @@ const copyToClipboard = (text: string) => {
             <div class="text-center py-8">
               <p class="text-gray-600 dark:text-gray-400 mb-2">Current Balance</p>
               <p class="text-5xl font-bold text-gradient mb-6">
-                {{ formatPrice(userStore.wallet.balance) }}
+                {{ formatPrice(userStore.wallet.value.balance) }}
               </p>
               
               <!-- Top Up Form -->
@@ -353,7 +353,7 @@ const copyToClipboard = (text: string) => {
               Transaction History
             </h2>
             
-            <div v-if="userStore.wallet.transactions.length === 0" class="text-center py-8">
+            <div v-if="userStore.wallet.value.transactions.length === 0" class="text-center py-8">
               <p class="text-gray-600 dark:text-gray-400">
                 No transactions yet
               </p>
@@ -361,7 +361,7 @@ const copyToClipboard = (text: string) => {
 
             <div v-else class="space-y-3">
               <div
-                v-for="transaction in userStore.wallet.transactions.slice().reverse()"
+                v-for="transaction in userStore.wallet.value.transactions.slice().reverse()"
                 :key="transaction.id"
                 class="glass p-4 rounded-xl"
               >
