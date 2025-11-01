@@ -9,3 +9,12 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+// Changed: Added Window interface to ensure window object is properly typed
+declare global {
+  interface Window {
+    alert: (message?: string) => void;
+  }
+}
+
+export {}
