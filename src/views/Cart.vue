@@ -17,7 +17,7 @@ const formatPrice = (price: number) => {
 }
 
 const hasEnoughBalance = computed(() => {
-  return userStore.wallet.value.balance >= userStore.cartTotal.value
+  return userStore.wallet.balance >= userStore.cartTotal.value
 })
 
 const handleCheckout = async () => {
@@ -36,7 +36,7 @@ const handleCheckout = async () => {
   // Simulate payment processing
   await new Promise(resolve => setTimeout(resolve, 2000))
   
-  const success = userStore.completePurchase(selectedPaymentMethod.value)
+  const success = userStore.completePurchase({ method: selectedPaymentMethod.value })
   
   isProcessing.value = false
   
@@ -131,7 +131,7 @@ const handleCheckout = async () => {
               <div class="flex items-center justify-between">
                 <span class="text-gray-600 dark:text-gray-400">Wallet Balance</span>
                 <span class="text-xl font-bold text-gray-900 dark:text-white">
-                  {{ formatPrice(userStore.wallet.value.balance) }}
+                  {{ formatPrice(userStore.wallet.balance) }}
                 </span>
               </div>
             </div>

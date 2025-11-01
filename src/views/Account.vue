@@ -163,7 +163,7 @@ const copyToClipboard = (text: string) => {
               </div>
               <div class="glass p-4 rounded-xl text-center">
                 <p class="text-3xl font-bold text-gradient mb-2">
-                  {{ formatPrice(userStore.wallet.value.balance) }}
+                  {{ formatPrice(userStore.wallet.balance) }}
                 </p>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                   Wallet Balance
@@ -171,7 +171,7 @@ const copyToClipboard = (text: string) => {
               </div>
               <div class="glass p-4 rounded-xl text-center">
                 <p class="text-3xl font-bold text-gradient mb-2">
-                  {{ userStore.wallet.value.transactions.length }}
+                  {{ userStore.wallet.transactions.length }}
                 </p>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                   Transactions
@@ -297,7 +297,7 @@ const copyToClipboard = (text: string) => {
             <div class="text-center py-8">
               <p class="text-gray-600 dark:text-gray-400 mb-2">Current Balance</p>
               <p class="text-5xl font-bold text-gradient mb-6">
-                {{ formatPrice(userStore.wallet.value.balance) }}
+                {{ formatPrice(userStore.wallet.balance) }}
               </p>
               
               <!-- Top Up Form -->
@@ -353,7 +353,7 @@ const copyToClipboard = (text: string) => {
               Transaction History
             </h2>
             
-            <div v-if="userStore.wallet.value.transactions.length === 0" class="text-center py-8">
+            <div v-if="userStore.wallet.transactions.length === 0" class="text-center py-8">
               <p class="text-gray-600 dark:text-gray-400">
                 No transactions yet
               </p>
@@ -361,7 +361,7 @@ const copyToClipboard = (text: string) => {
 
             <div v-else class="space-y-3">
               <div
-                v-for="transaction in userStore.wallet.value.transactions.slice().reverse()"
+                v-for="transaction in userStore.wallet.transactions.slice().reverse()"
                 :key="transaction.id"
                 class="glass p-4 rounded-xl"
               >

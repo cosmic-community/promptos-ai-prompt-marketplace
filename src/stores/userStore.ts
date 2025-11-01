@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue';
-import type { User, CartItem, PurchasedProduct, Wallet, PaymentMethod } from '@/types';
+import type { User, CartItem, PurchasedProduct, Wallet, PaymentMethodData } from '@/types';
 
 // Mock user data - in production, this would be fetched from an API
 const currentUser = ref<User | null>(null);
@@ -113,18 +113,18 @@ export const useUserStore = () => {
   };
 
   // Purchase methods
-  const completePurchase = (paymentMethod: PaymentMethod): boolean => {
+  const completePurchase = (paymentMethodData: PaymentMethodData): boolean => {
     if (!isLoggedIn.value) return false;
     
     const total = cartTotal.value;
     
     // Check wallet balance if paying with wallet
-    if (paymentMethod === 'wallet' && wallet.value.balance < total) {
+    if (paymentMethodData.method === 'wallet' && wallet.value.balance < total) {
       return false;
     }
 
     // Deduct from wallet if paying with wallet
-    if (paymentMethod === 'wallet') {
+    if (paymentMethodData.method === 'wallet') {
       wallet.value.balance -= total;
       wallet.value.transactions.push({
         id: Math.random().toString(36).substr(2, 9),
