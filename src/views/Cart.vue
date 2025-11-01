@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
-import type { CartItem } from '@/types'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -27,7 +26,7 @@ const handleCheckout = async () => {
   }
 
   if (selectedPaymentMethod.value === 'wallet' && !hasEnoughBalance.value) {
-    alert('Insufficient wallet balance. Please top up your wallet.')
+    window.alert('Insufficient wallet balance. Please top up your wallet.')
     return
   }
 
@@ -41,10 +40,10 @@ const handleCheckout = async () => {
   isProcessing.value = false
   
   if (success) {
-    alert('Purchase successful! 🎉 Check your account for purchased prompts.')
+    window.alert('Purchase successful! 🎉 Check your account for purchased prompts.')
     router.push('/account')
   } else {
-    alert('Purchase failed. Please try again.')
+    window.alert('Purchase failed. Please try again.')
   }
 }
 </script>
