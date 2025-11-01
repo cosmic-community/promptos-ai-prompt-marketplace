@@ -111,6 +111,11 @@ export interface WalletTransaction {
 // Payment method type
 export type PaymentMethod = 'wallet' | 'bank_transfer';
 
+// Payment method data interface (for form submission)
+export interface PaymentMethodData {
+  method: PaymentMethod;
+}
+
 // Purchase interface
 export interface Purchase {
   id: string;

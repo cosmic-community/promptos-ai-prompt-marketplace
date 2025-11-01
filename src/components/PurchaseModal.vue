@@ -23,10 +23,6 @@ const purchaseAmount = computed(() => {
     : props.prompt.metadata.price
 })
 
-const purchaseType = computed(() => {
-  return props.subscriptionPlan ? 'subscription' : 'one-time'
-})
-
 const hasEnoughBalance = computed(() => {
   return walletBalance.value >= purchaseAmount.value
 })

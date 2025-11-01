@@ -1,5 +1,5 @@
 import { cosmic, hasStatus } from './cosmic'
-import type { Prompt, Category, SubscriptionPlan, CosmicResponse } from '@/types'
+import type { Prompt, Category, SubscriptionPlan } from '@/types'
 
 // Fetch all prompts with category data
 export async function getPrompts(): Promise<Prompt[]> {

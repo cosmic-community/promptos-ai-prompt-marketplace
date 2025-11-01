@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import type { CartItem } from '@/types'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -16,7 +17,7 @@ const formatPrice = (price: number) => {
 }
 
 const hasEnoughBalance = computed(() => {
-  return userStore.wallet.balance >= userStore.cartTotal
+  return userStore.wallet.value.balance >= userStore.cartTotal.value
 })
 
 const handleCheckout = async () => {
@@ -57,7 +58,7 @@ const handleCheckout = async () => {
         </h1>
 
         <!-- Empty Cart -->
-        <div v-if="userStore.cartCount === 0" class="text-center py-12">
+        <div v-if="userStore.cartCount.value === 0" class="text-center py-12">
           <div class="text-6xl mb-4">🛒</div>
           <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             Your cart is empty
@@ -75,7 +76,7 @@ const handleCheckout = async () => {
           <!-- Items List -->
           <div class="space-y-4">
             <div
-              v-for="item in userStore.cartItems"
+              v-for="item in userStore.cartItems.value"
               :key="item.id"
               class="glass-card"
             >
@@ -130,7 +131,7 @@ const handleCheckout = async () => {
               <div class="flex items-center justify-between">
                 <span class="text-gray-600 dark:text-gray-400">Wallet Balance</span>
                 <span class="text-xl font-bold text-gray-900 dark:text-white">
-                  {{ formatPrice(userStore.wallet.balance) }}
+                  {{ formatPrice(userStore.wallet.value.balance) }}
                 </span>
               </div>
             </div>
@@ -220,7 +221,7 @@ const handleCheckout = async () => {
               <div class="flex items-center justify-between text-xl">
                 <span class="font-semibold text-gray-900 dark:text-white">Total</span>
                 <span class="font-bold text-gradient">
-                  {{ formatPrice(userStore.cartTotal) }}
+                  {{ formatPrice(userStore.cartTotal.value) }}
                 </span>
               </div>
             </div>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
 
@@ -62,8 +62,8 @@ const handleLogout = () => {
             class="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl glass hover:bg-white/30 dark:hover:bg-black/30 transition-all relative"
           >
             <span class="text-xl">🛒</span>
-            <span v-if="userStore.cartCount > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-              {{ userStore.cartCount }}
+            <span v-if="userStore.cartCount.value > 0" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
+              {{ userStore.cartCount.value }}
             </span>
           </router-link>
 
@@ -75,7 +75,7 @@ const handleLogout = () => {
           >
             <span class="text-xl">💳</span>
             <span class="font-semibold text-gradient">
-              {{ formatPrice(userStore.wallet.balance) }}
+              {{ formatPrice(userStore.wallet.value.balance) }}
             </span>
           </router-link>
 
@@ -93,7 +93,7 @@ const handleLogout = () => {
             class="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl glass hover:bg-white/30 dark:hover:bg-black/30 transition-all"
           >
             <span class="text-xl">👤</span>
-            <span class="font-medium">{{ userStore.currentUser?.name }}</span>
+            <span class="font-medium">{{ userStore.currentUser.value?.name }}</span>
           </router-link>
 
           <!-- Theme Toggle -->
@@ -129,13 +129,13 @@ const handleLogout = () => {
           <!-- User Info (if logged in) -->
           <div v-if="userStore.isLoggedIn" class="glass p-3 rounded-xl">
             <div class="flex items-center justify-between mb-2">
-              <span class="text-gray-700 dark:text-gray-300 font-medium">👤 {{ userStore.currentUser?.name }}</span>
+              <span class="text-gray-700 dark:text-gray-300 font-medium">👤 {{ userStore.currentUser.value?.name }}</span>
               <button @click="handleLogout" class="text-sm text-red-600 dark:text-red-400">
                 Logout
               </button>
             </div>
             <div class="text-sm text-gray-600 dark:text-gray-400">
-              Wallet: {{ formatPrice(userStore.wallet.balance) }}
+              Wallet: {{ formatPrice(userStore.wallet.value.balance) }}
             </div>
           </div>
 
@@ -147,8 +147,8 @@ const handleLogout = () => {
             class="flex items-center justify-between glass hover:bg-white/30 dark:hover:bg-black/30 px-4 py-3 rounded-xl"
           >
             <span class="text-gray-700 dark:text-gray-300 font-medium">🛒 Shopping Cart</span>
-            <span v-if="userStore.cartCount > 0" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-              {{ userStore.cartCount }}
+            <span v-if="userStore.cartCount.value > 0" class="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+              {{ userStore.cartCount.value }}
             </span>
           </router-link>
 

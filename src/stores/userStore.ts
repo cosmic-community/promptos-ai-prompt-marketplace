@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue';
-import type { User, CartItem, PurchasedProduct, Wallet, WalletTransaction } from '@/types';
+import type { User, CartItem, PurchasedProduct, Wallet, PaymentMethod } from '@/types';
 
 // Mock user data - in production, this would be fetched from an API
 const currentUser = ref<User | null>(null);
@@ -164,7 +164,7 @@ export const useUserStore = () => {
     return true;
   };
 
-  const renewSubscription = (productId: string, planId: string, price: number): boolean => {
+  const renewSubscription = (productId: string, price: number): boolean => {
     if (!isLoggedIn.value || wallet.value.balance < price) return false;
 
     const product = purchasedProducts.value.find(p => p.id === productId);

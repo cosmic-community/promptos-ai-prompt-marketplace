@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/userStore'
+import type { PurchasedProduct } from '@/types'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -29,7 +30,7 @@ const formatDate = (date: string) => {
 }
 
 const activePurchases = computed(() => {
-  return userStore.purchasedProducts.filter(p => p.status === 'active' || p.type === 'one-time')
+  return userStore.purchasedProducts.value.filter((p: PurchasedProduct) => p.status === 'active' || p.type === 'one-time')
 })
 
 const handleTopUp = () => {
@@ -59,6 +60,12 @@ const getTimeRemaining = (expiryDate?: string) => {
   
   if (days > 0) return `${days} days ${hours} hours`
   return `${hours} hours`
+}
+
+const copyToClipboard = (text: string) => {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text)
+  }
 }
 </script>
 
@@ -123,19 +130,19 @@ const getTimeRemaining = (expiryDate?: string) => {
               <div>
                 <label class="text-sm text-gray-600 dark:text-gray-400 block mb-1">Name</label>
                 <p class="text-lg font-medium text-gray-900 dark:text-white">
-                  {{ userStore.currentUser?.name }}
+                  {{ userStore.currentUser.value?.name }}
                 </p>
               </div>
               <div>
                 <label class="text-sm text-gray-600 dark:text-gray-400 block mb-1">Email</label>
                 <p class="text-lg font-medium text-gray-900 dark:text-white">
-                  {{ userStore.currentUser?.email }}
+                  {{ userStore.currentUser.value?.email }}
                 </p>
               </div>
               <div>
                 <label class="text-sm text-gray-600 dark:text-gray-400 block mb-1">Member Since</label>
                 <p class="text-lg font-medium text-gray-900 dark:text-white">
-                  {{ formatDate(userStore.currentUser?.createdAt || '') }}
+                  {{ formatDate(userStore.currentUser.value?.createdAt || '') }}
                 </p>
               </div>
             </div>
@@ -156,7 +163,7 @@ const getTimeRemaining = (expiryDate?: string) => {
               </div>
               <div class="glass p-4 rounded-xl text-center">
                 <p class="text-3xl font-bold text-gradient mb-2">
-                  {{ formatPrice(userStore.wallet.balance) }}
+                  {{ formatPrice(userStore.wallet.value.balance) }}
                 </p>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                   Wallet Balance
@@ -164,7 +171,7 @@ const getTimeRemaining = (expiryDate?: string) => {
               </div>
               <div class="glass p-4 rounded-xl text-center">
                 <p class="text-3xl font-bold text-gradient mb-2">
-                  {{ userStore.wallet.transactions.length }}
+                  {{ userStore.wallet.value.transactions.length }}
                 </p>
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                   Transactions
@@ -235,7 +242,7 @@ const getTimeRemaining = (expiryDate?: string) => {
                       {{ purchase.accessKey }}
                     </code>
                     <button 
-                      @click="navigator.clipboard.writeText(purchase.accessKey)"
+                      @click="copyToClipboard(purchase.accessKey)"
                       class="btn-secondary py-2 px-3 text-sm"
                     >
                       Copy
@@ -290,7 +297,7 @@ const getTimeRemaining = (expiryDate?: string) => {
             <div class="text-center py-8">
               <p class="text-gray-600 dark:text-gray-400 mb-2">Current Balance</p>
               <p class="text-5xl font-bold text-gradient mb-6">
-                {{ formatPrice(userStore.wallet.balance) }}
+                {{ formatPrice(userStore.wallet.value.balance) }}
               </p>
               
               <!-- Top Up Form -->
@@ -346,7 +353,7 @@ const getTimeRemaining = (expiryDate?: string) => {
               Transaction History
             </h2>
             
-            <div v-if="userStore.wallet.transactions.length === 0" class="text-center py-8">
+            <div v-if="userStore.wallet.value.transactions.length === 0" class="text-center py-8">
               <p class="text-gray-600 dark:text-gray-400">
                 No transactions yet
               </p>
@@ -354,7 +361,7 @@ const getTimeRemaining = (expiryDate?: string) => {
 
             <div v-else class="space-y-3">
               <div
-                v-for="transaction in userStore.wallet.transactions.slice().reverse()"
+                v-for="transaction in userStore.wallet.value.transactions.slice().reverse()"
                 :key="transaction.id"
                 class="glass p-4 rounded-xl"
               >

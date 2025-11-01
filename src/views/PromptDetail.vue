@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getPrompt } from '@/lib/api'
 import { useUserStore } from '@/stores/userStore'
-import type { Prompt } from '@/types'
+import type { Prompt, PurchasedProduct } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -26,7 +26,7 @@ const parseTags = computed(() => {
 
 const purchasedProduct = computed(() => {
   if (!prompt.value) return null
-  return userStore.purchasedProducts.find(p => p.promptId === prompt.value!.id)
+  return userStore.purchasedProducts.value.find((p: PurchasedProduct) => p.promptId === prompt.value!.id)
 })
 
 const hasPurchased = computed(() => !!purchasedProduct.value)
@@ -74,7 +74,6 @@ const handleRenew = () => {
   // Mock renewal with 1 month extension
   const renewed = userStore.renewSubscription(
     purchasedProduct.value.id,
-    'renewal',
     prompt.value.metadata.price
   )
   
@@ -82,6 +81,12 @@ const handleRenew = () => {
     alert('Subscription renewed! 🎉')
   } else {
     alert('Insufficient wallet balance. Please top up your wallet.')
+  }
+}
+
+const copyToClipboard = (text: string) => {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text)
   }
 }
 
@@ -228,7 +233,7 @@ onMounted(async () => {
                       {{ purchasedProduct.accessKey }}
                     </code>
                     <button 
-                      @click="navigator.clipboard.writeText(purchasedProduct.accessKey)"
+                      @click="copyToClipboard(purchasedProduct.accessKey)"
                       class="btn-secondary py-2 px-3 text-sm"
                     >
                       Copy
