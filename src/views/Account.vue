@@ -67,6 +67,11 @@ const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text)
   }
 }
+
+// Changed: Added helper function to handle renewal alerts
+const handleRenewal = () => {
+  window.alert('Renewal functionality coming soon!')
+}
 </script>
 
 <template>
@@ -277,10 +282,7 @@ const copyToClipboard = (text: string) => {
                 </router-link>
                 <button 
                   v-if="purchase.type === 'subscription'"
-                  @click="() => {
-                    // Mock renewal
-                    window.alert('Renewal functionality coming soon!')
-                  }"
+                  @click="handleRenewal"
                   class="btn-primary flex-1"
                 >
                   Renew
